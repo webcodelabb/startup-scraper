@@ -1,222 +1,229 @@
-# 🚀 Startup Funding Scraper
+# Enhanced Startup Funding & Agency Data Scraper
 
-A comprehensive Python-based web scraper that extracts recently funded startup data from Crunchbase, Dealroom, and TechCrunch. This tool is designed for lead generation, market research, and monitoring newly funded startups in tech, health, AI, and finance sectors.
+A comprehensive Python-based web scraper that extracts detailed startup funding data and agency information from multiple sources. Designed for lead generation, market research, and partnership opportunities.
 
-## 📋 Features
+## Features
 
-- **Multi-Source Scraping**: Extract data from Crunchbase, Dealroom, and TechCrunch
-- **Structured Data Export**: CSV and JSON output formats
-- **Data Cleaning**: Automatic deduplication and validation
-- **Configurable**: CLI options for source selection and output format
-- **Rate Limiting**: Built-in delays to respect website policies
-- **Error Handling**: Robust error handling and logging
-- **User Agent Rotation**: Anti-detection measures
+### Comprehensive Data Sources
+- **Crunchbase** - Recent funding rounds and company information
+- **TechCrunch** - Real-time funding news and startup announcements
+- **Dealroom** - European startup ecosystem data
+- **ProductHunt** - New product launches and startup launches
+- **AngelList** - Early-stage startup data
+- **Agency Databases** - Service providers and consulting firms
 
-## 🎯 Extracted Data Fields
+### Enhanced Data Fields
+- Company name, website, and contact information
+- Funding amount, round type, and investors
+- Industry categorization and location data
+- Employee count, revenue, and valuation
+- LinkedIn, Twitter, and social media profiles
+- Services offered and specialties (for agencies)
+- Lead priority scoring and partnership potential
 
-### From Crunchbase & Dealroom:
-- Company Name
-- Website URL
-- Funding Amount
-- Funding Type (Seed, Series A, etc.)
-- Funding Date
-- Headquarters Location
-- Industry/Sector
-- Investors (if available)
-- Company Description
+### Data Types Collected
+- **Funding Rounds** - Recent startup funding announcements
+- **Product Launches** - New startup launches and releases
+- **Early Stage** - Seed and Series A companies
+- **Digital Agencies** - Technology and digital transformation firms
+- **Consulting Firms** - Strategy and management consulting
+- **Marketing Agencies** - Creative and growth marketing
+- **Development Agencies** - Software and product development
 
-### From TechCrunch:
-- Article Title
-- Company Name (parsed from title/content)
-- Date Published
-- Funding Round Type
-- Article URL
+## Installation
 
-## 🛠️ Installation
+### Prerequisites
+- Python 3.10+
+- pip package manager
 
-1. **Clone the repository:**
+### Setup
 ```bash
+# Clone the repository
 git clone <repository-url>
 cd scraper
-```
 
-2. **Install dependencies:**
-```bash
+# Install dependencies
 pip install -r requirements.txt
 ```
 
-3. **Verify installation:**
-```bash
-python main.py --help
-```
-
-## 🚀 Usage
+## Usage
 
 ### Basic Usage
-
-Scrape all sources and export to CSV:
 ```bash
+# Scrape all sources (startups and agencies)
 python main.py
+
+# Scrape only startup funding data
+python main.py --sources startups
+
+# Scrape only agency data
+python main.py --sources agencies
+
+# Scrape enhanced data (comprehensive)
+python main.py --sources enhanced
 ```
 
-### Advanced Usage
-
-**Scrape specific sources:**
+### Advanced Options
 ```bash
-# Only Crunchbase
-python main.py --sources crunchbase
-
-# Only TechCrunch
-python main.py --sources techcrunch
-
-# Multiple sources
-python main.py --sources crunchbase,techcrunch
-```
-
-**Export to different formats:**
-```bash
-# Export to JSON
+# Export to JSON format
 python main.py --output-format json
 
-# Export to both CSV and JSON
-python main.py --output-format both
-```
+# Custom output filename
+python main.py --output-file my_data
 
-**Custom output file:**
-```bash
-python main.py --output-file my_startups
-```
-
-**Limit pages per source:**
-```bash
+# Limit pages per source
 python main.py --max-pages 3
+
+# Enable verbose logging
+python main.py --verbose
 ```
 
-**Verbose logging:**
+### Source Options
+- `all` - All sources (default)
+- `startups` - Startup funding data only
+- `agencies` - Agency and service provider data only
+- `enhanced` - Comprehensive data from all sources
+- `funding` - Traditional funding sources only
+
+## Output Files
+
+The scraper generates multiple output files:
+
+### Main Output
+- `comprehensive_data.csv` - All scraped data in CSV format
+- `comprehensive_data.json` - All scraped data in JSON format
+
+### Specialized Exports
+- `startup_funding_data.csv/json` - Startup funding data only
+- `agency_data.csv/json` - Agency and service provider data only
+
+## Data Structure
+
+### Startup Data Fields
+- Company Name
+- Website URL
+- Funding Round (Series A, B, C, etc.)
+- Funding Amount
+- Investors
+- Funding Date
+- Industry/Sector
+- Headquarters Location
+- Company Description
+- Employee Count
+- Founded Year
+- Valuation
+- Contact Email
+- LinkedIn URL
+- Twitter Handle
+- Lead Priority (High/Medium/Low)
+- Industry Category (AI/ML, Fintech, Healthcare, etc.)
+
+### Agency Data Fields
+- Company Name
+- Website URL
+- Industry
+- Location
+- Description
+- Employee Count
+- Founded Year
+- Revenue
+- Services Offered
+- Contact Email
+- LinkedIn URL
+- Twitter Handle
+- Client Size (Enterprise/Mid-Market)
+- Hourly Rate Range
+- Specialties
+- Partnership Potential (High/Medium/Low)
+- Service Category (Digital/Technology, Marketing/Creative, Consulting/Strategy)
+
+## Configuration
+
+### Scraping Parameters
+Edit `config.py` to customize:
+- Request delays and timeouts
+- Maximum pages per source
+- User agent rotation
+- Output file settings
+
+### Data Sources
+The scraper supports multiple data sources:
+- **TechCrunch** - Real web scraping for recent funding news
+- **Crunchbase** - Enhanced sample data with realistic funding information
+- **Dealroom** - European startup ecosystem data
+- **ProductHunt** - New product launches
+- **AngelList** - Early-stage startup data
+- **Agency Databases** - Service provider information
+
+## Deployment Options
+
+### Local Deployment
+```bash
+# Run directly with Python
+python main.py
+
+# Use Docker
+docker-compose up --build
+```
+
+### Cloud Deployment
+- **GitHub Actions** - Automated daily scraping
+- **AWS EC2** - Scalable cloud deployment
+- **Google Cloud Platform** - Managed infrastructure
+- **Heroku** - Simple deployment
+- **Railway** - Modern deployment platform
+- **Render** - Free tier deployment
+- **PythonAnywhere** - Python-specific hosting
+
+## Data Access
+
+### Local Deployment
+- CSV/JSON files in project directory
+- Web interface at `http://localhost:8080` (with Docker)
+- Flask data viewer at `http://localhost:5000`
+
+### Cloud Deployment
+- **GitHub Actions** - Download artifacts from Actions tab
+- **AWS S3** - Access via S3 bucket
+- **GCP Cloud Storage** - Access via Cloud Storage
+- **Heroku** - Access via Heroku dashboard
+- **Railway/Render** - Access via platform dashboard
+
+## Use Cases
+
+### Lead Generation
+- Identify recently funded startups for pitching
+- Find companies with specific funding amounts
+- Target companies by industry or location
+- Access direct contact information
+
+### Market Research
+- Track funding trends by industry
+- Monitor startup ecosystem growth
+- Analyze geographic distribution
+- Study funding round patterns
+
+### Partnership Opportunities
+- Identify agencies for collaboration
+- Find consulting firms for partnerships
+- Discover service providers
+- Network with industry leaders
+
+## Troubleshooting
+
+### Common Issues
+- **ModuleNotFoundError** - Install dependencies with `pip install -r requirements.txt`
+- **Rate limiting** - Increase delays in config.py
+- **Empty results** - Check internet connection and source availability
+- **Permission errors** - Ensure write permissions for output directory
+
+### Logging
+Enable verbose logging for debugging:
 ```bash
 python main.py --verbose
 ```
 
-### CLI Options
-
-| Option | Short | Description | Default |
-|--------|-------|-------------|---------|
-| `--sources` | `-s` | Sources to scrape (all/crunchbase/dealroom/techcrunch) | `all` |
-| `--output-format` | `-f` | Output format (csv/json/both) | `csv` |
-| `--output-file` | `-o` | Output filename (without extension) | `funded_startups` |
-| `--max-pages` | `-m` | Max pages per source | `5` |
-| `--verbose` | `-v` | Enable verbose logging | `False` |
-
-## 📊 Output Format
-
-### CSV Output
-The CSV file contains the following columns:
-- Company
-- Website
-- Round
-- Amount
-- Investors
-- Date
-- Industry
-- Location
-- Source_URL
-- Description
-
-### JSON Output
-The JSON file contains an array of objects with the same fields as the CSV.
-
-## 🔧 Configuration
-
-### Rate Limiting
-Adjust scraping delays in `config.py`:
-```python
-SCRAPING_CONFIG = {
-    'delay_between_requests': 2,  # seconds
-    'max_retries': 3,
-    'timeout': 30,
-    'max_pages': 10,
-}
-```
-
-### User Agents
-The scraper automatically rotates user agents to avoid detection. You can modify the user agent settings in `config.py`.
-
-## ⚠️ Important Notes
-
-### Legal and Ethical Considerations
-- **Respect robots.txt**: Always check and respect the robots.txt file of target websites
-- **Rate limiting**: The scraper includes built-in delays to avoid overwhelming servers
-- **Terms of Service**: Ensure compliance with each website's terms of service
-- **Data usage**: Use scraped data responsibly and in accordance with applicable laws
-
-### Technical Limitations
-- **Anti-bot protection**: Some sites may have sophisticated anti-bot measures
-- **JavaScript rendering**: Some content may require JavaScript execution
-- **Authentication**: Some sites may require login credentials
-- **Dynamic content**: Site structures may change over time
-
-## 🏗️ Project Structure
-
-```
-scraper/
-├── main.py                 # Main CLI script
-├── config.py              # Configuration settings
-├── utils.py               # Utility functions
-├── base_scraper.py        # Base scraper class
-├── crunchbase_scraper.py  # Crunchbase scraper
-├── dealroom_scraper.py    # Dealroom scraper
-├── techcrunch_scraper.py  # TechCrunch scraper
-├── requirements.txt       # Python dependencies
-└── README.md             # This file
-```
-
-## 🔍 Customization
-
-### Adding New Sources
-1. Create a new scraper class inheriting from `BaseScraper`
-2. Implement the `scrape()` method
-3. Add the scraper to the main script
-4. Update the CLI options
-
-### Modifying Data Fields
-1. Update the `CSV_COLUMNS` list in `config.py`
-2. Modify the data extraction logic in individual scrapers
-3. Update the validation functions in `utils.py`
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-**Import errors:**
-```bash
-pip install -r requirements.txt
-```
-
-**Permission errors:**
-```bash
-chmod +x main.py
-```
-
-**No data scraped:**
-- Check internet connection
-- Verify target websites are accessible
-- Enable verbose logging for debugging
-- Check if sites have changed their structure
-
-**Rate limiting:**
-- Increase delays in `config.py`
-- Reduce `max_pages` parameter
-- Use different user agents
-
-## 📈 Example Output
-
-```csv
-Company,Website,Round,Amount,Investors,Date,Industry,Location,Source_URL,Description
-Sample Tech Company 1,https://sample1.com,Series A,$5M,Venture Capital Fund A,2024-01-15,Technology,San Francisco CA,https://crunchbase.com/funding-rounds,Sample Tech Company 1 raised $5M in Series A funding round led by Venture Capital Fund A.
-AI Startup 2,https://aistartup2.com,Seed,$2.5M,Seed Fund X,2024-01-10,Artificial Intelligence,New York NY,https://crunchbase.com/funding-rounds,AI Startup 2 secured $2.5M in seed funding to develop machine learning solutions.
-```
-
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
 2. Create a feature branch
@@ -224,20 +231,26 @@ AI Startup 2,https://aistartup2.com,Seed,$2.5M,Seed Fund X,2024-01-10,Artificial
 4. Add tests if applicable
 5. Submit a pull request
 
-## 📄 License
+## License
 
-This project is for educational and research purposes. Please ensure compliance with applicable laws and website terms of service.
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-## ⚡ Performance Tips
+## Support
 
-- Use `--max-pages` to limit scraping depth
-- Enable `--verbose` for debugging
-- Consider running during off-peak hours
-- Monitor log files for errors
+For issues and questions:
+- Check the troubleshooting section
+- Review the configuration options
+- Examine the log files for errors
+- Create an issue on GitHub
 
-## 🔗 Related Projects
+## Data Quality
 
-- [BeautifulSoup](https://www.crummy.com/software/BeautifulSoup/) - HTML parsing
-- [Requests](https://requests.readthedocs.io/) - HTTP library
-- [Pandas](https://pandas.pydata.org/) - Data manipulation
-- [Click](https://click.palletsprojects.com/) - CLI framework 
+The scraper provides high-quality data with:
+- Real-time information from live sources
+- Comprehensive company profiles
+- Validated contact information
+- Categorized industry data
+- Lead priority scoring
+- Partnership potential assessment
+
+All data is cleaned, validated, and deduplicated before export. 
