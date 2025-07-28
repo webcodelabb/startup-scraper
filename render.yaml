@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: startup-scraper
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python main.py --sources all --output-format both
+    plan: free
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10.0 

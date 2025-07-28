@@ -1,0 +1,63 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Scraper specific
+# Keep scraped data private (optional)
+*.csv
+*.json
+scraper.log
+
+# Sensitive data
+.env
+config.ini
+secrets.json
+api_keys.txt
+
+# Temporary files
+*.tmp
+*.temp
+temp/
+tmp/
+
+# Data directories
+data/
+logs/
+output/
+
+# Docker
+.dockerignore 

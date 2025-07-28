@@ -1,0 +1,71 @@
+name: Startup Funding Scraper
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Run daily at 9 AM UTC
+    - cron: '0 9 * * *'
+  workflow_dispatch: # Allow manual runs
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Run scraper
+      run: |
+        python main.py --sources all --output-format both --output-file scraped_data
+        echo "Scraping completed!"
+        
+    - name: List generated files
+      run: |
+        ls -la *.csv *.json || echo "No files found"
+        
+    - name: Upload CSV data
+      uses: actions/upload-artifact@v3
+      with:
+        name: startup-funding-data-csv
+        path: scraped_data.csv
+        retention-days: 30
+        
+    - name: Upload JSON data
+      uses: actions/upload-artifact@v3
+      with:
+        name: startup-funding-data-json
+        path: scraped_data.json
+        retention-days: 30
+        
+    - name: Create summary
+      run: |
+        echo "## 📊 Scraping Summary" >> $GITHUB_STEP_SUMMARY
+        echo "**Date:** $(date)" >> $GITHUB_STEP_SUMMARY
+        echo "**Files generated:**" >> $GITHUB_STEP_SUMMARY
+        ls -la *.csv *.json >> $GITHUB_STEP_SUMMARY || echo "No files found" >> $GITHUB_STEP_SUMMARY
+        
+    - name: Comment on PR
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v6
+      with:
+        script: |
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: '🚀 Scraping completed! Check the Actions tab for data files.'
+          }) 

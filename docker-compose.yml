@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  scraper:
+    build: .
+    container_name: startup-scraper
+    volumes:
+      # Mount data directory to persist scraped data
+      - ./data:/app/data
+      # Mount logs directory
+      - ./logs:/app/logs
+    environment:
+      - DATA_DIR=/app/data
+      - LOG_DIR=/app/logs
+    command: python main.py --sources all --output-format both --output-file /app/data/funded_startups
+    restart: unless-stopped
+
+  # Optional: Add a simple web server to view results
+  web-server:
+    image: nginx:alpine
+    container_name: scraper-web
+    ports:
+      - "8080:80"
+    volumes:
+      - ./data:/usr/share/nginx/html
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - scraper
+    restart: unless-stopped 
