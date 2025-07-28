@@ -22,111 +22,111 @@ class TechCrunchScraper(BaseScraper):
         
         all_data = []
         page = 1
-        max_pages = 5  # Limit pages to avoid overwhelming the site
+        max_pages = 3  # Limit pages to get recent articles
         
         while page <= max_pages:
             self.log_progress(f"Scraping TechCrunch page {page}...")
             
-            # For demo purposes, we'll create sample data structure
-            # In practice, you'd parse the actual HTML structure
+            # Build URL for pagination
+            if page == 1:
+                url = self.funding_url
+            else:
+                url = f"{self.funding_url}page/{page}/"
             
-            sample_data = self._scrape_sample_page(page)
-            if not sample_data:
+            # Get the page
+            soup = self.get_soup(url)
+            if not soup:
+                self.log_progress(f"Failed to load page {page}")
                 break
+            
+            # Extract article links
+            articles = self._extract_article_links(soup)
+            if not articles:
+                self.log_progress(f"No articles found on page {page}")
+                break
+            
+            # Scrape each article
+            for article_url in articles[:5]:  # Limit to 5 articles per page
+                try:
+                    article_data = self._scrape_individual_article(article_url)
+                    if article_data:
+                        all_data.append(article_data)
+                        self.log_progress(f"Scraped: {article_data.get('Company', 'Unknown')}")
+                except Exception as e:
+                    self.log_progress(f"Error scraping article {article_url}: {e}")
                 
-            all_data.extend(sample_data)
+                self.delay(1)  # Be respectful
+            
             page += 1
-            self.delay(1)  # Shorter delay for TechCrunch
+            self.delay(2)  # Delay between pages
         
         self.log_progress(f"TechCrunch scraping completed. Found {len(all_data)} entries.")
         return all_data
     
-    def _scrape_sample_page(self, page: int) -> List[Dict[str, Any]]:
-        """Scrape a single page - this is a sample implementation"""
-        # In a real implementation, you would:
-        # 1. Make request to the funding tag page
-        # 2. Parse article listings
-        # 3. Extract article URLs
-        # 4. Scrape individual articles for funding details
+    def _extract_article_links(self, soup) -> List[str]:
+        """Extract article URLs from the funding page"""
+        articles = []
         
-        # For demo purposes, creating sample data
-        sample_data = [
-            {
-                'Company': f'TechCrunch Startup {page}-1',
-                'Website': f'https://techcrunchstartup{page}1.com',
-                'Round': 'Series C',
-                'Amount': '$25M',
-                'Investors': 'Silicon Valley VC, Growth Fund',
-                'Date': '2024-01-25',
-                'Industry': 'SaaS',
-                'Location': 'San Francisco, CA',
-                'Source_URL': f'{self.funding_url}?page={page}',
-                'Description': f'TechCrunch Startup {page}-1 raises $25M Series C to scale enterprise SaaS platform.'
-            },
-            {
-                'Company': f'Mobile App {page}-2',
-                'Website': f'https://mobileapp{page}2.com',
-                'Round': 'Series A',
-                'Amount': '$12M',
-                'Investors': 'Mobile Ventures, App Fund',
-                'Date': '2024-01-22',
-                'Industry': 'Mobile Apps',
-                'Location': 'Austin, TX',
-                'Source_URL': f'{self.funding_url}?page={page}',
-                'Description': f'Mobile App {page}-2 secures $12M Series A for AI-powered mobile platform.'
-            },
-            {
-                'Company': f'EdTech Platform {page}-3',
-                'Website': f'https://edtechplatform{page}3.com',
-                'Round': 'Seed',
-                'Amount': '$4M',
-                'Investors': 'Education Fund, Angel Investors',
-                'Date': '2024-01-19',
-                'Industry': 'Education Technology',
-                'Location': 'Boston, MA',
-                'Source_URL': f'{self.funding_url}?page={page}',
-                'Description': f'EdTech Platform {page}-3 raises $4M seed round for online learning platform.'
-            }
+        # Look for article links in different possible selectors
+        selectors = [
+            'article a[href*="/2024/"]',  # 2024 articles
+            'article a[href*="/2023/"]',  # 2023 articles
+            '.post-block__title a',       # Article titles
+            'h2 a',                       # Headers
+            'a[href*="/tag/funding/"]'   # Funding tag links
         ]
         
-        return sample_data
+        for selector in selectors:
+            links = soup.select(selector)
+            for link in links:
+                href = self.extract_href(link)
+                if href and '/tag/funding/' not in href and self.base_url in href:
+                    full_url = self.clean_url(href, self.base_url)
+                    if full_url not in articles:
+                        articles.append(full_url)
+        
+        return articles[:10]  # Limit to 10 articles per page
     
-    def _parse_article_listing(self, article_element) -> Dict[str, Any]:
-        """Parse individual article listing element"""
+    def _scrape_individual_article(self, article_url: str) -> Dict[str, Any]:
+        """Scrape individual article for detailed funding information"""
+        soup = self.get_soup(article_url)
+        if not soup:
+            return {}
+        
         data = {}
         
         # Article title
-        title_elem = article_element.find('h2', class_='post-block__title')
+        title_elem = soup.find('h1') or soup.find('title')
         if title_elem:
-            title_link = title_elem.find('a')
-            if title_link:
-                data['Article_Title'] = clean_text(self.extract_text(title_link))
-                data['Article_URL'] = self.clean_url(self.extract_href(title_link), self.base_url)
+            data['Article_Title'] = clean_text(self.extract_text(title_elem))
         
         # Publication date
-        date_elem = article_element.find('time', class_='post-block__time')
+        date_elem = soup.find('time') or soup.find('span', class_='time')
         if date_elem:
             data['Date'] = clean_text(self.extract_text(date_elem))
         
-        # Article excerpt
-        excerpt_elem = article_element.find('div', class_='post-block__content')
-        if excerpt_elem:
-            data['Description'] = clean_text(self.extract_text(excerpt_elem))
+        # Article content
+        content_elem = soup.find('div', class_='article-content') or soup.find('article')
+        if content_elem:
+            data['Description'] = clean_text(self.extract_text(content_elem))
         
         # Extract company name from title
         if data.get('Article_Title'):
             data['Company'] = self._extract_company_from_title(data['Article_Title'])
         
-        # Extract funding details from title and excerpt
-        if data.get('Article_Title') or data.get('Description'):
-            full_text = f"{data.get('Article_Title', '')} {data.get('Description', '')}"
-            data['Round'] = extract_funding_round(full_text)
-            data['Amount'] = extract_amount(full_text)
+        # Extract funding details
+        if data.get('Description'):
+            data['Round'] = extract_funding_round(data['Description'])
+            data['Amount'] = extract_amount(data['Description'])
+            data['Investors'] = self._extract_investors_from_text(data['Description'])
         
         # Source URL
-        data['Source_URL'] = data.get('Article_URL', self.funding_url)
+        data['Source_URL'] = article_url
         
-        return data
+        # Only return if we have meaningful data
+        if data.get('Company') and data.get('Amount'):
+            return data
+        return {}
     
     def _extract_company_from_title(self, title: str) -> str:
         """Extract company name from article title"""
@@ -140,6 +140,7 @@ class TechCrunchScraper(BaseScraper):
             r'(\w+(?:\s+\w+)*)\s+lands?\s+',
             r'(\w+(?:\s+\w+)*)\s+closes?\s+',
             r'(\w+(?:\s+\w+)*)\s+announces?\s+',
+            r'(\w+(?:\s+\w+)*)\s+funding',
         ]
         
         for pattern in patterns:
@@ -147,48 +148,10 @@ class TechCrunchScraper(BaseScraper):
             if match:
                 company_name = clean_text(match.group(1))
                 # Filter out common words that aren't company names
-                if len(company_name) > 2 and company_name.lower() not in ['the', 'a', 'an']:
+                if len(company_name) > 2 and company_name.lower() not in ['the', 'a', 'an', 'startup', 'company']:
                     return company_name
         
         return ""
-    
-    def _scrape_individual_article(self, article_url: str) -> Dict[str, Any]:
-        """Scrape individual article for detailed funding information"""
-        soup = self.get_soup(article_url)
-        if not soup:
-            return {}
-        
-        data = {}
-        
-        # Article title
-        title_elem = soup.find('h1', class_='article__title')
-        if title_elem:
-            data['Article_Title'] = clean_text(self.extract_text(title_elem))
-        
-        # Publication date
-        date_elem = soup.find('time')
-        if date_elem:
-            data['Date'] = clean_text(self.extract_text(date_elem))
-        
-        # Article content
-        content_elem = soup.find('div', class_='article-content')
-        if content_elem:
-            data['Description'] = clean_text(self.extract_text(content_elem))
-        
-        # Extract company name
-        if data.get('Article_Title'):
-            data['Company'] = self._extract_company_from_title(data['Article_Title'])
-        
-        # Extract funding details
-        if data.get('Description'):
-            data['Round'] = extract_funding_round(data['Description'])
-            data['Amount'] = extract_amount(data['Description'])
-            data['Investors'] = self._extract_investors_from_text(data['Description'])
-        
-        # Source URL
-        data['Source_URL'] = article_url
-        
-        return data
     
     def _extract_investors_from_text(self, text: str) -> str:
         """Extract investor names from article text"""
@@ -201,6 +164,7 @@ class TechCrunchScraper(BaseScraper):
             r'investors?\s+include\s+([^.]+)',
             r'backed\s+by\s+([^.]+)',
             r'participated\s+by\s+([^.]+)',
+            r'co-led\s+by\s+([^,]+)',
         ]
         
         investors = []
